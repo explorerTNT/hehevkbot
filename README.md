@@ -14,8 +14,8 @@
 
 1. Склонируйте репозиторий:
    ```bash
-   git clone https://github.com/yourusername/random-video-bot.git
-   cd random-video-bot
+   git clone https://github.com/explorerTNT/hehevkbot
+   cd hehevkbot
    ```
 
 2. Создайте группу в VK и получите токен группы:
