@@ -9,9 +9,12 @@ GROUP_TOKEN = ""  # Вставь токен своей группы
 GROUP_ID = ""  # ID группы
 API_KEY = ""  # Твой API-ключ YouTube
 
-# Функция для получения случайного видео с YouTube
-def get_random_youtube_video():
-    print("Лог: Запущена функция get_random_youtube_video()")
+# Глобальный список для хранения видео
+cached_videos = []
+
+# Функция для получения нового списка видео
+def fetch_videos():
+    print("Лог: Запрашиваем новые видео...")
     search_terms = ['funny', 'music', 'tech', 'animals', 'gaming', 'news']
     search_term = random.choice(search_terms)
     print(f"Лог: Выбран поисковый запрос '{search_term}'")
@@ -32,18 +35,38 @@ def get_random_youtube_video():
         data = response.json()
         items = data.get("items", [])
         print(f"Лог: Найдено {len(items)} видео")
-        if items:
-            random_video = random.choice(items)
-            video_id = random_video["id"]["videoId"]
-            video_url = f"https://www.youtube.com/watch?v={video_id}"
-            print(f"Лог: Случайное видео - {video_url}")
-            return video_url
-        else:
-            print("Лог: Видео не найдены")
-            return "Не удалось найти видео."
+        return [
+            f"https://www.youtube.com/watch?v={item['id']['videoId']}" for item in items
+        ]
     else:
         print(f"Лог: Ошибка API: {response.status_code}, {response.text}")
-        return f"Ошибка API: {response.status_code}, {response.text}"
+        return []
+
+# Функция для получения случайного видео из кэша или нового запроса
+def get_random_youtube_video():
+    global cached_videos
+
+    # Если в кэше ничего нет, запросить новые видео
+    if not cached_videos:
+        print("Лог: Кэш пуст, запрашиваем новые видео...")
+        cached_videos = fetch_videos()
+    else:
+        print(f"Лог: Видео в кэше: {len(cached_videos)}")
+
+    # Если всё равно ничего не нашли, вернуть сообщение об ошибке
+    if not cached_videos:
+        print("Лог: Не удалось заполнить кэш видео.")
+        return "Не удалось найти видео."
+
+    # Выбираем случайное видео из кэша
+    video_url = random.choice(cached_videos)
+    print(f"Лог: Случайное видео - {video_url}")
+    
+    # Удаляем выбранное видео из кэша
+    cached_videos.remove(video_url)
+    print(f"Лог: Видео удалено из кэша. Осталось {len(cached_videos)} видео.")
+
+    return video_url
 
 # Функция для получения случайного видео с Pornhub
 def get_random_pornhub_video():
